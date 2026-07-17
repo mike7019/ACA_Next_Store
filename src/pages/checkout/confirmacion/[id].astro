@@ -1,0 +1,59 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { formatCOP } from '../../../lib/format';
+import { prisma } from '../../../lib/prisma';
+
+const id = Number(Astro.params.id);
+
+const pedido = await prisma.pedido.findUnique({
+  where: { id },
+  include: {
+    cliente: true,
+    detalles: { include: { producto: true } },
+    envio: { include: { metodoEnvio: true } },
+    pago: true,
+  },
+});
+
+if (!pedido) {
+  return Astro.redirect('/');
+}
+---
+
+<Layout title={`Pedido #${pedido.id}`}>
+  <div class="mx-auto max-w-2xl px-4 py-16 text-center">
+    <p class="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-500">Pedido recibido</p>
+    <h1 class="mb-2 text-3xl font-bold">Gracias, {pedido.cliente.nombre}!</h1>
+    <p class="mb-10 text-neutral-400">Tu pedido #{pedido.id} quedo registrado y sera confirmado pronto.</p>
+
+    <div class="rounded-2xl border border-neutral-800 bg-neutral-900 p-6 text-left">
+      <div class="flex flex-col gap-3">
+        {pedido.detalles.map((d) => (
+          <div class="flex items-center justify-between text-sm">
+            <span>{d.producto.nombre} x{d.cantidad}</span>
+            <span class="font-semibold">{formatCOP(d.subtotal)}</span>
+          </div>
+        ))}
+      </div>
+      <div class="mt-4 flex flex-col gap-1 border-t border-neutral-800 pt-4 text-sm text-neutral-400">
+        <div class="flex justify-between"><span>Subtotal</span><span>{formatCOP(pedido.subtotal)}</span></div>
+        <div class="flex justify-between"><span>Envio ({pedido.envio?.metodoEnvio.nombre})</span><span>{formatCOP(pedido.costoEnvio)}</span></div>
+        <div class="flex justify-between text-base font-bold text-neutral-100"><span>Total</span><span>{formatCOP(pedido.total)}</span></div>
+      </div>
+      <div class="mt-4 border-t border-neutral-800 pt-4 text-sm text-neutral-400">
+        <p>Metodo de pago: <span class="text-neutral-200">{pedido.pago?.metodo.replace('_', ' ')}</span></p>
+        <p>Estado del pago: <span class="text-neutral-200">{pedido.pago?.estado}</span></p>
+        <p>Estado del pedido: <span class="text-neutral-200">{pedido.estado}</span></p>
+      </div>
+    </div>
+
+    <a href="/productos" class="mt-10 inline-block rounded-full border border-neutral-700 px-6 py-3 font-semibold hover:border-brand-500 hover:text-brand-400">
+      Seguir comprando
+    </a>
+  </div>
+</Layout>
+
+<script>
+  import { clearCart } from '../../../lib/cart-client';
+  clearCart();
+</script>

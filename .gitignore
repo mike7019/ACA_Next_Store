@@ -1,4 +1,21 @@
-/ecommerce-app
+# environment
 .env
 .env.local
 .env.*.local
+
+# dependencies
+node_modules/
+
+# astro build output
+dist/
+.astro/
+
+# prisma generated client
+src/generated/
+
+# logs
+npm-debug.log*
+*.log
+
+# editor / os
+.DS_Store

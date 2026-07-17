@@ -2,31 +2,30 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: ecommerce_db
+    container_name: ironfuel_db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-admin}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      POSTGRES_DB: ${POSTGRES_DB:-ecommerce}
+      POSTGRES_DB: ${POSTGRES_DB:-ironfuel}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./ecommerce_schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
     networks:
-      - ecommerce_net
+      - ironfuel_net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-ecommerce}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-ironfuel}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   pgadmin:
     image: dpage/pgadmin4:latest
-    container_name: ecommerce_pgadmin
+    container_name: ironfuel_pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ecommerce.com}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ironfuel.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
       PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
@@ -34,7 +33,7 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     networks:
-      - ecommerce_net
+      - ironfuel_net
     depends_on:
       postgres:
         condition: service_healthy
@@ -44,5 +43,5 @@ volumes:
   pgadmin_data:
 
 networks:
-  ecommerce_net:
+  ironfuel_net:
     driver: bridge

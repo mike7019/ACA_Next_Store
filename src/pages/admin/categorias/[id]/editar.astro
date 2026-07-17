@@ -1,0 +1,56 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import { prisma } from '../../../../lib/prisma';
+
+const id = Number(Astro.params.id);
+let categoria = await prisma.categoria.findUnique({ where: { id } });
+
+if (!categoria) {
+  return Astro.redirect('/admin/categorias');
+}
+
+let error: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const nombre = String(form.get('nombre') ?? '').trim();
+  const descripcion = String(form.get('descripcion') ?? '').trim();
+
+  if (!nombre) {
+    error = 'El nombre es obligatorio.';
+  } else {
+    try {
+      categoria = await prisma.categoria.update({
+        where: { id },
+        data: { nombre, descripcion: descripcion || null },
+      });
+      return Astro.redirect('/admin/categorias');
+    } catch {
+      error = 'Ya existe una categoria con ese nombre.';
+    }
+  }
+}
+---
+
+<AdminLayout title={`Editar: ${categoria.nombre}`}>
+  {error && <p class="mb-4 rounded-lg border border-red-700 bg-red-950/40 px-4 py-3 text-sm text-red-300">{error}</p>}
+
+  <form method="POST" class="grid max-w-lg gap-4">
+    <label class="flex flex-col gap-1 text-sm">
+      Nombre
+      <input name="nombre" required value={categoria.nombre} class="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      Descripcion
+      <textarea name="descripcion" rows="3" class="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2">{categoria.descripcion}</textarea>
+    </label>
+    <div class="flex gap-3">
+      <button type="submit" class="rounded-lg bg-brand-500 px-5 py-2 font-semibold text-neutral-950 hover:bg-brand-400">
+        Guardar cambios
+      </button>
+      <a href="/admin/categorias" class="rounded-lg border border-neutral-700 px-5 py-2 hover:border-neutral-500">
+        Cancelar
+      </a>
+    </div>
+  </form>
+</AdminLayout>

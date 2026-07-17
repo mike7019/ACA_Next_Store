@@ -1,0 +1,106 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Carrito">
+  <div class="mx-auto max-w-4xl px-4 py-10">
+    <h1 class="mb-8 text-2xl font-bold">Tu carrito</h1>
+
+    <p id="cart-empty" class="hidden text-neutral-400">
+      Tu carrito esta vacio. <a href="/productos" class="text-brand-500 hover:text-brand-400">Ver productos</a>
+    </p>
+
+    <div id="cart-content" class="hidden">
+      <div id="cart-items" class="flex flex-col gap-4"></div>
+      <div class="mt-8 flex items-center justify-between border-t border-neutral-800 pt-6">
+        <span class="text-lg font-semibold">Total</span>
+        <span id="cart-total" class="text-2xl font-bold"></span>
+      </div>
+      <a
+        href="/checkout"
+        class="mt-6 block rounded-full bg-brand-500 px-6 py-3 text-center font-semibold text-neutral-950 hover:bg-brand-400"
+      >
+        Proceder al pago
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  import { getCart, updateQty, removeFromCart, onCartUpdated } from '../lib/cart-client';
+  import { formatCOP } from '../lib/format';
+
+  const emptyEl = document.getElementById('cart-empty')!;
+  const contentEl = document.getElementById('cart-content')!;
+  const listEl = document.getElementById('cart-items')!;
+  const totalEl = document.getElementById('cart-total')!;
+
+  function buildRow(item: ReturnType<typeof getCart>[number]) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-4';
+    row.dataset.id = String(item.productoId);
+
+    const thumb = document.createElement('div');
+    thumb.className = 'h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-800';
+    if (item.imagenUrl) {
+      const img = document.createElement('img');
+      img.src = item.imagenUrl;
+      img.className = 'h-full w-full object-cover';
+      img.alt = '';
+      thumb.appendChild(img);
+    }
+
+    const info = document.createElement('div');
+    info.className = 'flex-1';
+    const link = document.createElement('a');
+    link.href = `/productos/${item.slug}`;
+    link.className = 'font-semibold hover:text-brand-400';
+    link.textContent = item.nombre;
+    const unitPrice = document.createElement('p');
+    unitPrice.className = 'text-sm text-neutral-400';
+    unitPrice.textContent = `${formatCOP(item.precio)} c/u`;
+    info.append(link, unitPrice);
+
+    const qtyInput = document.createElement('input');
+    qtyInput.type = 'number';
+    qtyInput.min = '1';
+    qtyInput.value = String(item.cantidad);
+    qtyInput.dataset.qty = 'true';
+    qtyInput.className = 'w-16 rounded-lg border border-neutral-700 bg-neutral-950 px-2 py-1 text-center';
+    qtyInput.addEventListener('change', () => {
+      updateQty(item.productoId, Math.max(1, Number(qtyInput.value)));
+    });
+
+    const subtotal = document.createElement('span');
+    subtotal.className = 'w-28 text-right font-semibold';
+    subtotal.textContent = formatCOP(item.precio * item.cantidad);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'text-neutral-500 hover:text-red-400';
+    removeBtn.textContent = '✕';
+    removeBtn.addEventListener('click', () => removeFromCart(item.productoId));
+
+    row.append(thumb, info, qtyInput, subtotal, removeBtn);
+    return row;
+  }
+
+  function render() {
+    const items = getCart();
+
+    if (items.length === 0) {
+      emptyEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+      return;
+    }
+
+    emptyEl.classList.add('hidden');
+    contentEl.classList.remove('hidden');
+
+    listEl.replaceChildren(...items.map(buildRow));
+    totalEl.textContent = formatCOP(items.reduce((sum, i) => sum + i.precio * i.cantidad, 0));
+  }
+
+  render();
+  onCartUpdated(render);
+</script>

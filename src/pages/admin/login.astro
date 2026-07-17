@@ -1,0 +1,75 @@
+---
+import '../../styles/global.css';
+import { createSessionToken, SESSION_COOKIE, SESSION_MAX_AGE_SECONDS, verifyPassword } from '../../lib/auth';
+import { prisma } from '../../lib/prisma';
+
+let error: string | null = null;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const email = String(form.get('email') ?? '').trim().toLowerCase();
+  const password = String(form.get('password') ?? '');
+
+  const admin = await prisma.admin.findUnique({ where: { email } });
+  const valido = admin ? await verifyPassword(password, admin.passwordHash) : false;
+
+  if (!admin || !valido) {
+    error = 'Correo o contrasena incorrectos.';
+  } else {
+    const token = createSessionToken({ adminId: admin.id, email: admin.email, nombre: admin.nombre });
+    Astro.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: import.meta.env.PROD,
+      path: '/',
+      maxAge: SESSION_MAX_AGE_SECONDS,
+    });
+    return Astro.redirect('/admin');
+  }
+}
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Ingresar · Admin IronFuel</title>
+  </head>
+  <body class="flex min-h-screen items-center justify-center bg-neutral-950 text-neutral-100">
+    <div class="w-full max-w-sm rounded-2xl border border-neutral-800 bg-neutral-900 p-8">
+      <h1 class="mb-1 text-xl font-black">
+        IRON<span class="text-brand-500">FUEL</span>
+      </h1>
+      <p class="mb-6 text-sm text-neutral-400">Panel de administracion</p>
+
+      {error && (
+        <p class="mb-4 rounded-lg border border-red-700 bg-red-950/40 px-4 py-2 text-sm text-red-300">{error}</p>
+      )}
+
+      <form method="POST" class="flex flex-col gap-4">
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="Correo electronico"
+          class="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2 focus:border-brand-500 focus:outline-none"
+        />
+        <input
+          type="password"
+          name="password"
+          required
+          placeholder="Contrasena"
+          class="rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2 focus:border-brand-500 focus:outline-none"
+        />
+        <button
+          type="submit"
+          class="mt-2 rounded-lg bg-brand-500 px-4 py-2 font-semibold text-neutral-950 transition hover:bg-brand-400"
+        >
+          Ingresar
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,78 @@
+---
+import { formatCOP, type Money } from '../lib/format';
+
+interface Props {
+  producto: {
+    id: number;
+    nombre: string;
+    slug: string;
+    marca: string | null;
+    precio: Money;
+    imagenUrl: string | null;
+    stock: number;
+  };
+}
+
+const { producto } = Astro.props;
+---
+
+<article class="group flex flex-col overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900 transition hover:border-brand-600">
+  <a href={`/productos/${producto.slug}`} class="block aspect-square overflow-hidden bg-neutral-800">
+    {producto.imagenUrl ? (
+      <img
+        src={producto.imagenUrl}
+        alt={producto.nombre}
+        class="h-full w-full object-cover transition group-hover:scale-105"
+        loading="lazy"
+      />
+    ) : (
+      <div class="flex h-full w-full items-center justify-center text-sm text-neutral-600">Sin imagen</div>
+    )}
+  </a>
+  <div class="flex flex-1 flex-col gap-2 p-4">
+    {producto.marca && (
+      <p class="text-xs font-semibold uppercase tracking-wide text-brand-500">{producto.marca}</p>
+    )}
+    <a href={`/productos/${producto.slug}`} class="font-semibold leading-snug hover:text-brand-400">
+      {producto.nombre}
+    </a>
+    <div class="mt-auto flex items-center justify-between pt-2">
+      <span class="text-lg font-bold">{formatCOP(producto.precio)}</span>
+      <button
+        data-add-to-cart
+        data-id={producto.id}
+        data-nombre={producto.nombre}
+        data-slug={producto.slug}
+        data-precio={String(producto.precio)}
+        data-imagen={producto.imagenUrl ?? ''}
+        disabled={producto.stock <= 0}
+        class="rounded-full bg-brand-500 px-3 py-1.5 text-sm font-semibold text-neutral-950 transition hover:bg-brand-400 disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400"
+      >
+        {producto.stock > 0 ? 'Agregar' : 'Agotado'}
+      </button>
+    </div>
+  </div>
+</article>
+
+<script>
+  import { addToCart } from '../lib/cart-client';
+
+  document.addEventListener('click', (event) => {
+    const btn = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-add-to-cart]');
+    if (!btn) return;
+
+    addToCart({
+      productoId: Number(btn.dataset.id),
+      nombre: btn.dataset.nombre ?? '',
+      slug: btn.dataset.slug ?? '',
+      precio: Number(btn.dataset.precio),
+      imagenUrl: btn.dataset.imagen || null,
+    });
+
+    const original = btn.textContent;
+    btn.textContent = 'Agregado ✓';
+    setTimeout(() => {
+      btn.textContent = original;
+    }, 1200);
+  });
+</script>
