@@ -1,7 +1,20 @@
 <%- include('partials/layout-start') %>
 
-<section class="border-b border-neutral-800 bg-gradient-to-b from-neutral-900 to-neutral-950">
-  <div class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-20">
+<% const heroVideoId = '40mFq3HDQso'; %>
+<section class="relative isolate overflow-hidden border-b border-neutral-800 bg-neutral-950">
+  <%# Video de fondo: iframe de YouTube en bucle, sin sonido ni controles, escalado para cubrir (cover). %>
+  <div class="pointer-events-none absolute inset-0 -z-20" aria-hidden="true">
+    <iframe
+      class="absolute left-1/2 top-1/2 h-[56.25vw] min-h-full w-[177.78vh] min-w-full -translate-x-1/2 -translate-y-1/2"
+      src="https://www.youtube-nocookie.com/embed/<%= heroVideoId %>?autoplay=1&mute=1&loop=1&playlist=<%= heroVideoId %>&controls=0&modestbranding=1&playsinline=1&rel=0&disablekb=1"
+      title="Video de fondo"
+      allow="autoplay; encrypted-media"
+      tabindex="-1"
+      loading="lazy"
+    ></iframe>
+  </div>
+  <div class="absolute inset-0 -z-10 bg-gradient-to-b from-neutral-950/70 via-neutral-950/60 to-neutral-950"></div>
+  <div class="mx-auto flex max-w-6xl flex-col items-start gap-6 px-4 py-28">
     <p class="text-sm font-semibold uppercase tracking-widest text-brand-500">Rendimiento sin limites</p>
     <h1 class="max-w-2xl text-4xl font-black leading-tight sm:text-5xl">
       Suplementos deportivos para llevar tu entrenamiento al siguiente nivel
