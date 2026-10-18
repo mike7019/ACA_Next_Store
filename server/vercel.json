@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "cd .. && npm install",
+  "buildCommand": "npx prisma generate && npx esbuild src/app.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.js && rm -rf api/views && cp -r src/views api/views && mkdir -p public && echo ok > public/.keep",
+  "outputDirectory": "public",
+  "rewrites": [{ "source": "/(.*)", "destination": "/api" }],
+  "functions": {
+    "api/index.js": { "includeFiles": "api/views/**" }
+  }
+}

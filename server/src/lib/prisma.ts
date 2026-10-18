@@ -8,7 +8,7 @@ declare global {
 }
 
 function createClient() {
-  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL });
+  const adapter = new PrismaPg({ connectionString: env.DATABASE_URL, max: 3 });
   return new PrismaClient({ adapter });
 }
 

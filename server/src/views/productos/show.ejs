@@ -1,0 +1,73 @@
+<%- include('../partials/layout-start') %>
+
+<div class="mx-auto max-w-6xl px-4 py-10">
+  <nav class="mb-6 text-sm text-neutral-500">
+    <a href="/productos" class="hover:text-brand-400">Productos</a>
+    <span class="mx-2">/</span>
+    <a href="/productos?categoria=<%= producto.categoria.slug %>" class="hover:text-brand-400"><%= producto.categoria.nombre %></a>
+  </nav>
+
+  <div class="grid gap-10 md:grid-cols-2">
+    <div class="aspect-square overflow-hidden rounded-2xl border border-neutral-800 bg-neutral-900">
+      <% if (producto.imagenUrl) { %>
+        <img src="<%= producto.imagenUrl %>" alt="<%= producto.nombre %>" class="h-full w-full object-cover" />
+      <% } else { %>
+        <div class="flex h-full w-full items-center justify-center text-neutral-600">Sin imagen</div>
+      <% } %>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <% if (producto.marca) { %>
+        <p class="text-sm font-semibold uppercase tracking-wide text-brand-500"><%= producto.marca %></p>
+      <% } %>
+      <h1 class="text-3xl font-bold"><%= producto.nombre %></h1>
+
+      <div class="flex flex-wrap gap-2 text-sm text-neutral-400">
+        <% if (producto.presentacion) { %><span class="rounded-full border border-neutral-700 px-3 py-1"><%= producto.presentacion %></span><% } %>
+        <% if (producto.sabor) { %><span class="rounded-full border border-neutral-700 px-3 py-1">Sabor: <%= producto.sabor %></span><% } %>
+      </div>
+
+      <p class="text-3xl font-black"><%= formatCOP(producto.precio) %></p>
+
+      <p class="whitespace-pre-line text-neutral-300"><%= producto.descripcion %></p>
+
+      <p class="text-sm text-neutral-500">
+        <%= producto.stock > 0 ? `${producto.stock} unidades disponibles` : 'Producto agotado' %>
+      </p>
+
+      <form method="post" action="/carrito/agregar" class="mt-4 flex items-center gap-3">
+        <input type="hidden" name="productoId" value="<%= producto.id %>" />
+        <input type="hidden" name="volver" value="<%= currentUrl %>" />
+        <input
+          type="number"
+          name="cantidad"
+          min="1"
+          max="<%= producto.stock %>"
+          value="1"
+          <%= producto.stock <= 0 ? 'disabled' : '' %>
+          class="w-20 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-center"
+        />
+        <button
+          type="submit"
+          <%= producto.stock <= 0 ? 'disabled' : '' %>
+          class="flex-1 rounded-full bg-brand-500 px-6 py-3 font-semibold text-neutral-950 transition hover:bg-brand-400 disabled:cursor-not-allowed disabled:bg-neutral-700 disabled:text-neutral-400"
+        >
+          <%= producto.stock <= 0 ? 'Agotado' : 'Agregar al carrito' %>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <% if (relacionados.length > 0) { %>
+    <section class="mt-16">
+      <h2 class="mb-6 text-xl font-bold">Tambien te puede interesar</h2>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <% relacionados.forEach((r) => { %>
+          <%- include('../partials/product-card', { producto: r }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+</div>
+
+<%- include('../partials/layout-end') %>

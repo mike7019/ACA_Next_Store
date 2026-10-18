@@ -2,25 +2,25 @@ import type { Request, Response, NextFunction } from 'express';
 import { Prisma } from '../generated/prisma/client.ts';
 import { AppError } from '../utils/AppError.ts';
 
+function renderError(res: Response, status: number, message: string) {
+  res.status(status).render('error', { title: `Error ${status}`, status, message });
+}
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: unknown, req: Request, res: Response, next: NextFunction) {
   if (err instanceof AppError) {
-    return res.status(err.status).json({ error: err.message });
+    return renderError(res, err.status, err.message);
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === 'P2002') {
-      return res.status(409).json({ error: 'Ya existe un registro con ese valor unico.' });
-    }
-    if (err.code === 'P2025') {
-      return res.status(404).json({ error: 'Registro no encontrado.' });
-    }
+    if (err.code === 'P2002') return renderError(res, 409, 'Ya existe un registro con ese valor unico.');
+    if (err.code === 'P2025') return renderError(res, 404, 'Registro no encontrado.');
   }
 
   console.error(err);
-  return res.status(500).json({ error: 'Ocurrio un error inesperado.' });
+  return renderError(res, 500, 'Ocurrio un error inesperado.');
 }
 
 export function notFoundHandler(req: Request, res: Response) {
-  res.status(404).json({ error: 'Ruta no encontrada.' });
+  renderError(res, 404, 'Pagina no encontrada.');
 }

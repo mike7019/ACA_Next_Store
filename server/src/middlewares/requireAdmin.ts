@@ -10,13 +10,14 @@ declare global {
 }
 
 export function requireAdmin(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies?.[SESSION_COOKIE];
-  const session = verifySessionToken(token);
+  const session = verifySessionToken(req.cookies?.[SESSION_COOKIE]);
 
   if (!session) {
-    return res.status(401).json({ error: 'No autenticado.' });
+    return res.redirect('/admin/login');
   }
 
   req.admin = session;
+  res.locals.admin = session;
+  res.locals.currentPath = req.baseUrl + req.path;
   next();
 }

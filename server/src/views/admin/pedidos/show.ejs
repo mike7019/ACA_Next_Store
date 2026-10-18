@@ -1,0 +1,87 @@
+<%- include('../partials/layout-start') %>
+
+<%
+  const selectClass = 'mb-3 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm capitalize';
+  const btnClass = 'w-full rounded-lg bg-brand-500 px-3 py-2 text-sm font-semibold text-neutral-950 hover:bg-brand-400';
+%>
+
+<div class="grid gap-6 lg:grid-cols-3">
+  <div class="lg:col-span-2">
+    <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+      <h2 class="mb-4 font-semibold">Productos</h2>
+      <div class="flex flex-col divide-y divide-neutral-800">
+        <% pedido.detalles.forEach((d) => { %>
+          <div class="flex items-center justify-between py-3 text-sm">
+            <div>
+              <p class="font-medium"><%= d.producto.nombre %></p>
+              <p class="text-neutral-500"><%= d.cantidad %> x <%= formatCOP(d.precioUnit) %></p>
+            </div>
+            <p class="font-semibold"><%= formatCOP(d.subtotal) %></p>
+          </div>
+        <% }) %>
+      </div>
+      <div class="mt-4 flex flex-col gap-1 border-t border-neutral-800 pt-4 text-sm text-neutral-400">
+        <div class="flex justify-between"><span>Subtotal</span><span><%= formatCOP(pedido.subtotal) %></span></div>
+        <div class="flex justify-between"><span>Envio</span><span><%= formatCOP(pedido.costoEnvio) %></span></div>
+        <div class="flex justify-between text-base font-bold text-neutral-100"><span>Total</span><span><%= formatCOP(pedido.total) %></span></div>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+      <h2 class="mb-4 font-semibold">Cliente y direccion</h2>
+      <p class="text-sm"><%= pedido.cliente.nombre %> <%= pedido.cliente.apellido %></p>
+      <p class="text-sm text-neutral-400"><%= pedido.cliente.email %> <%= pedido.cliente.telefono ? `· ${pedido.cliente.telefono}` : '' %></p>
+      <% if (pedido.direccionEnvio) { %>
+        <p class="mt-2 text-sm text-neutral-400">
+          <%= pedido.direccionEnvio.calle %>, <%= pedido.direccionEnvio.ciudad %><%= pedido.direccionEnvio.departamento ? `, ${pedido.direccionEnvio.departamento}` : '' %>
+        </p>
+      <% } %>
+    </div>
+
+    <a href="/admin/pedidos" class="mt-6 inline-block text-sm text-neutral-400 hover:text-neutral-200">← Volver a pedidos</a>
+  </div>
+
+  <div class="flex flex-col gap-6">
+    <form method="post" action="/admin/pedidos/<%= pedido.id %>/estado" class="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+      <h2 class="mb-3 font-semibold">Estado del pedido</h2>
+      <select name="estado" class="<%= selectClass %>">
+        <% estadosPedido.forEach((e) => { %>
+          <option value="<%= e %>" <%= pedido.estado === e ? 'selected' : '' %>><%= label(e) %></option>
+        <% }) %>
+      </select>
+      <button type="submit" class="<%= btnClass %>">Actualizar</button>
+    </form>
+
+    <% if (pedido.envio) { %>
+      <form method="post" action="/admin/pedidos/<%= pedido.id %>/envio" class="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+        <h2 class="mb-3 font-semibold">Envio (<%= pedido.envio.metodoEnvio.nombre %>)</h2>
+        <select name="estadoEnvio" class="<%= selectClass %>">
+          <% estadosEnvio.forEach((e) => { %>
+            <option value="<%= e %>" <%= pedido.envio.estado === e ? 'selected' : '' %>><%= label(e) %></option>
+          <% }) %>
+        </select>
+        <input
+          name="numeroGuia"
+          placeholder="Numero de guia"
+          value="<%= pedido.envio.numeroGuia || '' %>"
+          class="mb-3 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm"
+        />
+        <button type="submit" class="<%= btnClass %>">Actualizar</button>
+      </form>
+    <% } %>
+
+    <% if (pedido.pago) { %>
+      <form method="post" action="/admin/pedidos/<%= pedido.id %>/pago" class="rounded-xl border border-neutral-800 bg-neutral-950 p-5">
+        <h2 class="mb-3 font-semibold">Pago (<%= label(pedido.pago.metodo) %>)</h2>
+        <select name="estadoPago" class="<%= selectClass %>">
+          <% estadosPago.forEach((e) => { %>
+            <option value="<%= e %>" <%= pedido.pago.estado === e ? 'selected' : '' %>><%= e %></option>
+          <% }) %>
+        </select>
+        <button type="submit" class="<%= btnClass %>">Actualizar</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../partials/layout-end') %>

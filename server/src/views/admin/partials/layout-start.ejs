@@ -1,0 +1,39 @@
+<%- include('../../partials/head') %>
+  <body class="bg-neutral-900 text-neutral-100">
+    <div class="flex min-h-screen">
+      <aside class="w-56 shrink-0 border-r border-neutral-800 bg-neutral-950 p-4">
+        <a href="/admin" class="mb-8 block text-lg font-black tracking-tight">
+          IRON<span class="text-brand-500">FUEL</span> <span class="text-xs font-normal text-neutral-500">admin</span>
+        </a>
+        <%
+          const links = [
+            { to: '/admin', label: 'Panel', exact: true },
+            { to: '/admin/productos', label: 'Productos' },
+            { to: '/admin/categorias', label: 'Categorias' },
+            { to: '/admin/pedidos', label: 'Pedidos' },
+          ];
+          const activo = (l) => (l.exact ? currentPath.replace(/\/$/, '') === l.to : currentPath.startsWith(l.to));
+        %>
+        <nav class="flex flex-col gap-1 text-sm">
+          <% links.forEach((l) => { %>
+            <a
+              href="<%= l.to %>"
+              class="rounded-lg px-3 py-2 font-medium transition <%= activo(l) ? 'bg-brand-500 text-neutral-950' : 'text-neutral-300 hover:bg-neutral-900 hover:text-neutral-50' %>"
+            ><%= l.label %></a>
+          <% }) %>
+        </nav>
+        <form method="post" action="/admin/logout" class="mt-8">
+          <button
+            type="submit"
+            class="w-full rounded-lg border border-neutral-800 px-3 py-2 text-left text-sm text-neutral-400 hover:border-neutral-600 hover:text-neutral-200"
+          >Cerrar sesion</button>
+        </form>
+      </aside>
+
+      <div class="flex-1">
+        <header class="flex items-center justify-between border-b border-neutral-800 bg-neutral-950 px-6 py-4">
+          <h1 class="text-lg font-semibold"><%= title %></h1>
+          <p class="text-sm text-neutral-400"><%= admin.nombre %></p>
+        </header>
+        <div class="p-6">
+          <%- include('../../partials/flash') %>

@@ -1,0 +1,51 @@
+<%- include('partials/layout-start') %>
+
+<div class="mx-auto max-w-4xl px-4 py-10">
+  <h1 class="mb-8 text-2xl font-bold">Tu carrito</h1>
+
+  <% if (items.length === 0) { %>
+    <p class="text-neutral-400">
+      Tu carrito esta vacio. <a href="/productos" class="text-brand-500 hover:text-brand-400">Ver productos</a>
+    </p>
+  <% } else { %>
+    <div class="flex flex-col gap-4">
+      <% items.forEach((item) => { %>
+        <div class="flex items-center gap-4 rounded-xl border border-neutral-800 bg-neutral-900 p-4">
+          <div class="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-800">
+            <% if (item.producto.imagenUrl) { %><img src="<%= item.producto.imagenUrl %>" alt="" class="h-full w-full object-cover" /><% } %>
+          </div>
+          <div class="flex-1">
+            <a href="/productos/<%= item.producto.slug %>" class="font-semibold hover:text-brand-400"><%= item.producto.nombre %></a>
+            <p class="text-sm text-neutral-400"><%= formatCOP(item.producto.precio) %> c/u</p>
+          </div>
+          <form method="post" action="/carrito/actualizar/<%= item.producto.id %>" class="flex items-center gap-2">
+            <input
+              type="number"
+              name="cantidad"
+              min="1"
+              max="<%= item.producto.stock %>"
+              value="<%= item.cantidad %>"
+              class="w-16 rounded-lg border border-neutral-700 bg-neutral-950 px-2 py-1 text-center"
+            />
+            <button type="submit" class="text-sm text-brand-500 hover:text-brand-400">Actualizar</button>
+          </form>
+          <span class="w-28 text-right font-semibold"><%= formatCOP(item.subtotal) %></span>
+          <form method="post" action="/carrito/quitar/<%= item.producto.id %>">
+            <button type="submit" class="text-neutral-500 hover:text-red-400" aria-label="Quitar">✕</button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+
+    <div class="mt-8 flex items-center justify-between border-t border-neutral-800 pt-6">
+      <span class="text-lg font-semibold">Total</span>
+      <span class="text-2xl font-bold"><%= formatCOP(total) %></span>
+    </div>
+
+    <a href="/checkout" class="mt-6 block rounded-full bg-brand-500 px-6 py-3 text-center font-semibold text-neutral-950 hover:bg-brand-400">
+      Proceder al pago
+    </a>
+  <% } %>
+</div>
+
+<%- include('partials/layout-end') %>

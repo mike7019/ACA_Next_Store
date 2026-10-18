@@ -1,0 +1,77 @@
+<%- include('../partials/layout-start') %>
+
+<%
+  const inputClass = 'rounded-lg border border-neutral-700 bg-neutral-950 px-4 py-2';
+  const action = id ? `/admin/productos/${id}` : '/admin/productos';
+%>
+
+<% if (error) { %>
+  <p class="mb-4 rounded-lg border border-red-700 bg-red-950/40 px-4 py-3 text-sm text-red-300"><%= error %></p>
+<% } %>
+
+<form method="post" action="<%= action %>" class="grid max-w-2xl gap-4">
+  <label class="flex flex-col gap-1 text-sm">
+    Nombre
+    <input required name="nombre" value="<%= valores.nombre %>" class="<%= inputClass %>" />
+  </label>
+
+  <label class="flex flex-col gap-1 text-sm">
+    Categoria
+    <select required name="categoriaId" class="<%= inputClass %>">
+      <option value="">Selecciona una categoria</option>
+      <% categorias.forEach((c) => { %>
+        <option value="<%= c.id %>" <%= String(c.id) === valores.categoriaId ? 'selected' : '' %>><%= c.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+
+  <label class="flex flex-col gap-1 text-sm">
+    Descripcion
+    <textarea rows="4" name="descripcion" class="<%= inputClass %>"><%= valores.descripcion %></textarea>
+  </label>
+
+  <div class="grid grid-cols-2 gap-4">
+    <label class="flex flex-col gap-1 text-sm">
+      Marca
+      <input name="marca" value="<%= valores.marca %>" class="<%= inputClass %>" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      Sabor
+      <input name="sabor" value="<%= valores.sabor %>" class="<%= inputClass %>" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      Presentacion
+      <input name="presentacion" placeholder="ej. 1 kg, 60 caps" value="<%= valores.presentacion %>" class="<%= inputClass %>" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      URL de imagen
+      <input name="imagenUrl" value="<%= valores.imagenUrl %>" class="<%= inputClass %>" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      Precio (COP)
+      <input type="number" name="precio" min="0" step="100" required value="<%= valores.precio %>" class="<%= inputClass %>" />
+    </label>
+    <label class="flex flex-col gap-1 text-sm">
+      Stock
+      <input type="number" name="stock" min="0" value="<%= valores.stock %>" class="<%= inputClass %>" />
+    </label>
+  </div>
+
+  <div class="flex gap-6 text-sm">
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="activo" <%= valores.activo ? 'checked' : '' %> /> Activo
+    </label>
+    <label class="flex items-center gap-2">
+      <input type="checkbox" name="destacado" <%= valores.destacado ? 'checked' : '' %> /> Destacado en home
+    </label>
+  </div>
+
+  <div class="flex gap-3">
+    <button type="submit" class="rounded-lg bg-brand-500 px-5 py-2 font-semibold text-neutral-950 hover:bg-brand-400">
+      <%= id ? 'Guardar cambios' : 'Guardar producto' %>
+    </button>
+    <a href="/admin/productos" class="rounded-lg border border-neutral-700 px-5 py-2 hover:border-neutral-500">Cancelar</a>
+  </div>
+</form>
+
+<%- include('../partials/layout-end') %>

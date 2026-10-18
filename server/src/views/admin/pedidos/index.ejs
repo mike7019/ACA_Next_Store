@@ -1,0 +1,44 @@
+<%- include('../partials/layout-start') %>
+
+<div class="mb-6 flex flex-wrap gap-2">
+  <a
+    href="/admin/pedidos"
+    class="rounded-full border px-4 py-1.5 text-sm font-medium <%= !estadoFiltro ? 'border-brand-500 bg-brand-500 text-neutral-950' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500' %>"
+  >Todos</a>
+  <% estados.forEach((e) => { %>
+    <a
+      href="/admin/pedidos?estado=<%= e %>"
+      class="rounded-full border px-4 py-1.5 text-sm font-medium capitalize <%= estadoFiltro === e ? 'border-brand-500 bg-brand-500 text-neutral-950' : 'border-neutral-700 text-neutral-300 hover:border-neutral-500' %>"
+    ><%= label(e) %></a>
+  <% }) %>
+</div>
+
+<div class="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950">
+  <table class="w-full text-sm">
+    <thead class="text-left text-neutral-500">
+      <tr>
+        <th class="px-5 py-3 font-medium">#</th>
+        <th class="px-5 py-3 font-medium">Cliente</th>
+        <th class="px-5 py-3 font-medium">Fecha</th>
+        <th class="px-5 py-3 font-medium">Estado</th>
+        <th class="px-5 py-3 font-medium text-right">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% pedidos.forEach((p) => { %>
+        <tr class="border-t border-neutral-800">
+          <td class="px-5 py-3"><a href="/admin/pedidos/<%= p.id %>" class="text-brand-500 hover:text-brand-400">#<%= p.id %></a></td>
+          <td class="px-5 py-3"><%= p.cliente.nombre %> <%= p.cliente.apellido %></td>
+          <td class="px-5 py-3 text-neutral-400"><%= new Date(p.creadoEn).toLocaleDateString('es-CO') %></td>
+          <td class="px-5 py-3 capitalize"><%= label(p.estado) %></td>
+          <td class="px-5 py-3 text-right font-semibold"><%= formatCOP(p.total) %></td>
+        </tr>
+      <% }) %>
+      <% if (pedidos.length === 0) { %>
+        <tr><td colspan="5" class="px-5 py-6 text-center text-neutral-500">No hay pedidos con este filtro.</td></tr>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('../partials/layout-end') %>
